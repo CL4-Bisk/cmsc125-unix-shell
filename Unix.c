@@ -37,7 +37,7 @@ char* parse_command(char *input_line, Command *cmd) {
 }
 
 int main() {
-    // Example command: grep "pattern" < input.txt > output.txt &
+    // Example command: code "pattern" < input.txt > output.txt &
     Command cmd;
     cmd.command = "";
     cmd.args[0] = "";
