@@ -4,6 +4,7 @@
  */
 #include <stdio.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 typedef struct {
     char *command;        // Command name
@@ -29,18 +30,19 @@ void print_command(Command *cmd) {
     printf("Background execution: %s\n", cmd->background ? "yes" : "no");
 }
 
-char* parse_command(char *input_line, Command *cmd) {
+int parse_command(char *input_line, Command *cmd) {
     // This is a placeholder for the actual parsing logic.
     // In a real implementation, you would tokenize the input_line
     // and fill in the Command struct accordingly.
-    return NULL;
+    // use strtok to parse the input line
+    return 0;
 }
 
 int main() {
     // Example command: code "pattern" < input.txt > output.txt &
     Command cmd;
-    cmd.command = "";
-    cmd.args[0] = "";
+    cmd.command = "echo";
+    cmd.args[0] = "echo";
     cmd.args[1] = "pattern";
     cmd.args[2] = NULL; // NULL-terminate the args array
     cmd.input_file = "input.txt";
@@ -49,6 +51,8 @@ int main() {
     cmd.background = true; // run in background
 
     print_command(&cmd);
+
+    execpv(cmd.command, cmd.args);
     return 0;
 }
 
