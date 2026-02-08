@@ -26,6 +26,24 @@ int main() {
         /* built-in commands */
         if (strcmp(tokens, "exit") == 0) {
             return 0;
+        } else if (strcmp(tokens, "cd") == 0) {
+            /* tokenizes argument after inputting for checking current directory */
+            tokens = strtok(NULL, " ");
+            if (tokens == NULL) {
+                fprintf(stderr, "cd: missing argument\n");
+            } else if (chdir(tokens) != 0) {
+                perror("cd failed");
+            }
+            continue;
+        } else if (strcmp(tokens, "pwd") == 0) {
+            /* retrieves current working directory and prints */
+            char cwd[MAX_ARGS];
+            if (getcwd(cwd, sizeof(cwd)) != NULL) {
+                printf("%s\n", cwd);
+            } else {
+                perror("pwd failed");
+            }
+            continue;
         }
 
         /* adds the arguments into the command */
