@@ -28,19 +28,41 @@ void print_command(Command *cmd) {
 }
 
 /* main interpreter function */
-void Interpreter(Command *cmd){
-        int pid = fork();
+int Interpreter(Command *cmd){
 
-        if (pid == 0) {
-            
-            execvp(cmd -> command, cmd -> args);
-
-            perror("execvp failed");
-            exit(EXIT_FAILURE);
-        } else {
-            // Parent process
-            waitpid(pid, NULL, 0);
-            printf("Child successful runned first.\n");
+    /* built-in commands */
+    if (strcmp(cmd -> command, "exit") == 0) {
+        return 1;
+    } else if (strcmp(cmd -> command, "cd") == 0) {
+        /* tokenizes argument after inputting for checking current directory */
+        cmd -> command = strtok(NULL, " ");
+        if (cmd -> command == NULL) {
+            fprintf(stderr, "cd: missing argument\n");
+        } else if (chdir(cmd -> command) != 0) {
+            perror("cd failed");
         }
+        return 0;
+    } else if (strcmp(cmd -> command, "pwd") == 0) {
+        /* retrieves current working directory and prints */
+        char cwd[MAX_ARGS];
+        if (getcwd(cwd, sizeof(cwd)) != NULL) {
+            printf("%s\n", cwd);
+        } else {
+            perror("pwd failed");
+        }
+        return 0;
+    }
+    int pid = fork();
+
+    if (pid == 0) {
+        execvp(cmd -> command, cmd -> args);
+        perror("execvp failed");
+        exit(EXIT_FAILURE);
+    } else {
+        // Parent process
+        waitpid(pid, NULL, 0);
+        printf("Child successful runned first.\n");
+    }
+    return 0;
 }
 

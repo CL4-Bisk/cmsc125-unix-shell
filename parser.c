@@ -11,8 +11,20 @@
 #include "header.h"
 
 /* main parser function */
-char* Parser(char *input){
-    return strtok(input, " ");
+Command Parser(char *input){
+    Command cmd;
+
+    char *tokens = strtok(input, " ");
+            /* adds the arguments into the command */
+    int counter = 0;
+    cmd.command = tokens;
+
+    while (tokens != NULL) {
+        cmd.args[counter++] = tokens;
+        tokens = strtok(NULL, " ");
+    }
+    cmd.args[counter] = NULL;
+    return cmd;
 }
 
 
