@@ -19,10 +19,10 @@ int main() {
         arguments[strcspn(arguments, "\n")] = 0;
         
         /* accesses the parser file through the header */
-        Command cmd = Parser(arguments);
+        Command cmd = parse(arguments);
 
         /* accesses the interpreter file through the header */
-        int checker = Interpreter(&cmd);
+        int checker = interpret(&cmd);
         if(checker == 1){
             break;
         }

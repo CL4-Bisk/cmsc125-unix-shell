@@ -16,7 +16,7 @@ typedef struct {
 #define MAX_ARGS 254
 
 /* makes sure that the function in other files can be accessed in the mysh.c */
-Command Parser(char* input);
-int Interpreter(Command* cmd);
+Command parse(char* input);
+int interpret(Command* cmd);
 
 #endif
