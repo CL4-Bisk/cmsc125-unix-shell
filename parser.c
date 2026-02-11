@@ -12,17 +12,51 @@
 
 /* main parser function */
 Command parse(char *input){
-    Command cmd;
+
+    /* initiliazes the Command variable to avoid unknown default values*/
+    Command cmd = {
+        .command      = NULL,
+        .input_file   = NULL,
+        .output_file  = NULL,
+        .append       = false,
+        .background   = false,
+        .args         = {NULL}
+    };
 
     char *tokens = strtok(input, " ");
     /* adds the arguments into the command */
-    int counter = 0;
-    cmd.command = tokens;
 
+    int counter = 0;
     while (tokens != NULL) {
-        cmd.args[counter++] = tokens;
+
+        if (strcmp(tokens, "<") == 0) {
+            tokens = strtok(NULL, " ");
+            cmd.input_file = tokens;
+
+        } else if (strcmp(tokens, ">") == 0) {
+            tokens = strtok(NULL, " ");
+            cmd.output_file = tokens;
+            cmd.append = false;
+
+        } else if (strcmp(tokens, ">>") == 0) {
+            tokens = strtok(NULL, " ");
+            cmd.output_file = tokens;
+            cmd.append = true;
+
+        } else if (strcmp(tokens, "&") == 0) {
+            cmd.background = true;
+
+        } else {
+            if (cmd.command == NULL) {
+                cmd.command = tokens;
+            }
+            cmd.args[counter++] = tokens;
+            
+        }
+
         tokens = strtok(NULL, " ");
     }
+    
     cmd.args[counter] = NULL;
     return cmd;
 }
