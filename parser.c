@@ -53,7 +53,6 @@ Command parse(char *input){
             cmd.args[counter++] = tokens;
             
         }
-
         tokens = strtok(NULL, " ");
     }
     

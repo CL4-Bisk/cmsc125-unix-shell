@@ -41,7 +41,6 @@ void print_command(Command *cmd) {
 
 /* main interpreter function */
 int interpret(Command *cmd){
-
     /* built-in commands */
     if (strcmp(cmd -> command, "exit") == 0) {
         return 1;
