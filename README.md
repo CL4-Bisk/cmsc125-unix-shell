@@ -162,7 +162,51 @@ Currently looing for them.
 
 # Design and Architecture Overview
 
-Thinking about this one.
+Our shell implements a <strong>mini UNIX shell</strong>, and this follows a layered, process-based architecture. Background jobs are managed through a PID tracking subsystem and non-blocking wait calls.
+
+```
+User Input
+    v
+Parser Implementation
+    v
+Command Structure
+    v
+Interpreter Implementation
+    v
+Operating System Command Execution
+```
+This follows a simple Read–Parse–Execute Model of our work.
+
+### Model Breakthrough
+* Parser Module
+    * Tokenizes input
+    * Detects:
+        * Command
+        * Arguments
+        * Input redirection <
+        * Output redirection > / >>
+        * Background operator &
+    * Constructs a <strong>Command</strong> structure
+
+* Command Structure from <strong>header.h</strong>
+    ```
+    typedef struct {
+        char *command;        // Command name
+        char *args[256];      // Arguments (NULL-terminated)
+        char *input_file;     // For < redirection (NULL if none)
+        char *output_file;    // For > or >> redirection (NULL if none)
+        bool append;          // true for >>, false for >
+        bool background;      // true if & present
+    } Command;
+    ```
+* Interpreter Module
+    * Executes built-in commands
+    * Creates child processes using fork()
+    * Runs external programs using execvp()
+    * Handles:
+        * Redirection using dup2()
+        * Background jobs
+        * Zombie cleanup using waitpid(WNOHANG)
 
 # License
 
