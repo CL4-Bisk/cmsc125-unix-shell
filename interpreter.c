@@ -44,22 +44,36 @@ void print_command(Command *cmd)
     printf("Background execution: %s\n", cmd->background ? "yes" : "no");
 }
 
-void check_background_jobs(char *command, char *arg, pid_t pid)
-{
-    waitpid(pid, NULL, WNOHANG);
-    bg.job_counter++;
-    bg.background_jobs[bg.job_counter] = command;
-    bg.job_pids[bg.job_counter] = pid;
-
-    printf("[%d] Started background job: %s %s (PID: %d)\n", bg.job_counter,
-           bg.background_jobs[bg.job_counter],
-           arg,
-           bg.job_pids[bg.job_counter]);
+void reap_zombies() {
+    int status;
+    pid_t pid;
+    while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+        for (int i = 0; i < bg.job_counter; i++)
+        {
+            if (bg.job_pids[i] == pid)
+            {
+                printf("[%d] Done: %s\n", i + 1, bg.background_jobs[i]);
+                free(bg.background_jobs[i]);
+                bg.background_jobs[i] = NULL;
+                bg.job_pids[i] = 0;
+            }
+        }
+    }
 }
+
 
 /* main interpreter function */
 int interpret(Command *cmd)
 {
+ // For debugging purposes, can be removed in final version
+
+    reap_zombies();
+
+    if (cmd->command == NULL)
+    {
+        return 0;
+    }
+
     /* built-in commands */
     if (strcmp(cmd->command, "exit") == 0)
     {
@@ -67,8 +81,6 @@ int interpret(Command *cmd)
     }
     else if (strcmp(cmd->command, "cd") == 0)
     {
-        /* tokenizes argument after inputting for checking current directory */
-        cmd->command = strtok(NULL, " ");
         // for cd
         if (cmd->args[1] == NULL)
         {
@@ -96,7 +108,7 @@ int interpret(Command *cmd)
     }
     pid_t pid = fork();
 
-    if (pid == 0)
+    if (pid == 0) // Child process
     {
         // Handle Input Redirection
         if (cmd->input_file)
@@ -105,7 +117,7 @@ int interpret(Command *cmd)
             if (fd < 0)
             {
                 perror("Error opening for read");
-                return 0;
+                exit(EXIT_FAILURE);
             }
             dup2(fd, STDIN_FILENO); // STDIN now comes from input file
             close(fd);
@@ -120,7 +132,7 @@ int interpret(Command *cmd)
             if (fd < 0)
             {
                 perror("Error opening for write");
-                return 0;
+                exit(EXIT_FAILURE);
             }
             dup2(fd, STDOUT_FILENO); // STDOUT now comes from output file
             close(fd);
@@ -130,7 +142,7 @@ int interpret(Command *cmd)
         perror("Command execution failed");
         exit(127);
     }
-    else
+    else if (pid > 0)
     {
         // Parent process
         if (!cmd->background)
@@ -139,31 +151,23 @@ int interpret(Command *cmd)
         }
         else
         {
-            check_background_jobs(cmd->command, cmd->args[1], pid);
-            // waitpid(pid, NULL, WNOHANG);
-            // bg.job_counter++;
-            // bg.background_jobs[bg.job_counter] = cmd->command;
-            // strcat(bg.background_jobs[bg.job_counter], cmd->args[1]);
-            // bg.job_pids[bg.job_counter] = pid;
+            // Background: Record the job and move on
+            int index = bg.job_counter;
 
-            // printf("[%d] Started background job: %s (PID: %d)\n", bg.job_counter, bg.background_jobs[bg.job_counter], bg.job_pids[bg.job_counter]);
+            bg.job_pids[index] = pid;
+            bg.background_jobs[index] = strdup(cmd->command);
 
-            // bg.job_counter++;
-            // bg.background_jobs[bg.job_counter] = cmd -> command;
-            // strcat(bg.background_jobs[bg.job_counter], cmd -> args[1]);
-            // bg.job_pids[bg.job_counter] = pid;
-            // printf("[%d]\t%d\n", bg.job_counter, pid);
+            printf("[%d] Started background job: %s (PID: %d)\n",
+                index + 1, cmd->command, pid);
 
-            // // Check for completed background jobs
-            // for (int i = bg.job_counter; i > 0; i--) {
-            //     int status;
-            //     pid_t result = waitpid(bg.job_pids[i], &status, WNOHANG);
-            //     if (result > 0) {
-            //         printf("[%d] Done \t%s\n", i, bg.background_jobs[i]);
-            //         // bg.background_jobs[i] = NULL; dunno abt this pero hambal ni sir na remove completed job from the list (ʘ ͟ʖ ʘ)
-            //     }
-            // }
+            bg.job_counter++;
+
         }
+    } else if (pid < 0)
+    {
+        perror("fork failed");
+        return 0;
     }
+
     return 0;
 }

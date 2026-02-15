@@ -81,7 +81,8 @@ You should see version information for GCC.
 ### III. Integrating Visual Studio Code with WSL
 
 1. Download and install Visual Studio Code for Windows from the
-   [official website](https://code.visualstudio.com/). (Skip to 6 if already installed VS Code and installed WSL and C/C++ extensions)
+   [official website](https://code.visualstudio.com/).
+   (Skip to 6 if already installed VS Code and installed WSL and C/C++ extensions)
 2. Open Visual Studio Code.
 3. Under the Extensions tab, search for <strong>WSL</strong>.
 4. Install the WSL extension by Microsoft.
