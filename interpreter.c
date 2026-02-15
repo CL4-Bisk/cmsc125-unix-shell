@@ -53,7 +53,7 @@ void reap_zombies() {
         {
             if (bg.job_pids[i] == pid)
             {
-                printf("[%d] Done: %s\n", i + 1, bg.background_jobs[i]);
+                printf("\n[%d] Done: %s\n", i + 1, bg.background_jobs[i]);
                 free(bg.background_jobs[i]);
                 bg.background_jobs[i] = NULL;
                 bg.job_pids[i] = 0;
